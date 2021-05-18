@@ -14,8 +14,6 @@ public class User {
     private String username;
     @Property("private")
     private boolean profilePrivate;
-    @Relationship(type = "FOLLOWING", direction = Relationship.Direction.OUTGOING)
-    private Map<User, Interaction> following;
     @Relationship(type = "FOLLOWING", direction = Relationship.Direction.INCOMING)
     private Map<User, Interaction> followers;
 
@@ -38,14 +36,6 @@ public class User {
         this.profilePrivate = profilePrivate;
     }
 
-    public Map<User, Interaction> getFollowing() {
-        return following;
-    }
-
-    public void setFollowing(Map<User, Interaction> following) {
-        this.following = following;
-    }
-
     public Map<User, Interaction> getFollowers() {
         return followers;
     }
@@ -59,14 +49,11 @@ public class User {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return profilePrivate == user.profilePrivate &&
-                Objects.equals(username, user.username) &&
-                Objects.equals(following, user.following) &&
-                Objects.equals(followers, user.followers);
+        return Objects.equals(username, user.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, profilePrivate, following, followers);
+        return Objects.hash(username);
     }
 }
