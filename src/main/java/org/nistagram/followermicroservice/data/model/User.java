@@ -5,6 +5,7 @@ import org.neo4j.springframework.data.core.schema.Node;
 import org.neo4j.springframework.data.core.schema.Property;
 import org.neo4j.springframework.data.core.schema.Relationship;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,6 +19,7 @@ public class User {
     private Map<User, Interaction> followers;
 
     public User() {
+        followers = new HashMap<>();
     }
 
     public String getUsername() {
