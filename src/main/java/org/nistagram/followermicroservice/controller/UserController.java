@@ -1,6 +1,7 @@
 package org.nistagram.followermicroservice.controller;
 
 import org.modelmapper.ModelMapper;
+import org.nistagram.followermicroservice.controller.dto.EditUserDto;
 import org.nistagram.followermicroservice.controller.dto.UserDto;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.UsernameAlreadyExistsException;
@@ -33,10 +34,10 @@ public class UserController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<String> updateUser(@RequestBody @Valid UserDto userDto) {
+    @PutMapping("")
+    public ResponseEntity<String> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
         try {
-            userService.updateUser(modelMapper.map(userDto, User.class));
+            userService.updateUser(editUserDto);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UsernameAlreadyExistsException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

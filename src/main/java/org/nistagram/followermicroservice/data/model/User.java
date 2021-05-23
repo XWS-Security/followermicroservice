@@ -1,9 +1,6 @@
 package org.nistagram.followermicroservice.data.model;
 
-import org.neo4j.springframework.data.core.schema.Id;
-import org.neo4j.springframework.data.core.schema.Node;
-import org.neo4j.springframework.data.core.schema.Property;
-import org.neo4j.springframework.data.core.schema.Relationship;
+import org.neo4j.springframework.data.core.schema.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +9,9 @@ import java.util.Objects;
 @Node("NistagramUser")
 public class User {
     @Id
+    @GeneratedValue
+    private Long id;
+    @Property("username")
     private String username;
     @Property("private")
     private boolean profilePrivate;
@@ -19,7 +19,20 @@ public class User {
     private Map<User, Interaction> followers;
 
     public User() {
-        followers = new HashMap<>();
+    }
+
+    public User(String username, boolean profilePrivate) {
+        this.username = username;
+        this.profilePrivate = profilePrivate;
+        this.followers = new HashMap<>();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {

@@ -1,5 +1,6 @@
 package org.nistagram.followermicroservice.service.impl;
 
+import org.nistagram.followermicroservice.controller.dto.EditUserDto;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.data.repository.UserRepository;
 import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
@@ -27,13 +28,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(User user) {
-        User loadedUser = userRepository.findByUsername(user.getUsername());
+    public void updateUser(EditUserDto editUserDto) {
+        User loadedUser = userRepository.findByUsername(editUserDto.getOldUsername());
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
         }
-        loadedUser.setProfilePrivate(user.isProfilePrivate());
         // TODO: if user is switched to public update all follower requests to accepted
-        userRepository.save(loadedUser);
+        userRepository.updateProperties(loadedUser.getId(), editUserDto.getUsername(), editUserDto.isProfilePrivate());
     }
 }
