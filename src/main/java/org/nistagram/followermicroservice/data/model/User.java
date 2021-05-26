@@ -1,5 +1,6 @@
 package org.nistagram.followermicroservice.data.model;
 
+
 import org.neo4j.springframework.data.core.schema.*;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class User {
     private Map<User, Interaction> followers;
 
     public User() {
+        this.followers = new HashMap<>();
     }
 
     public User(String username, boolean profilePrivate) {
