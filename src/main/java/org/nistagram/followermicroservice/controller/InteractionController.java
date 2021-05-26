@@ -1,7 +1,8 @@
 package org.nistagram.followermicroservice.controller;
 
-import org.modelmapper.ModelMapper;
 import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
+import org.nistagram.followermicroservice.exception.FollowRequestFailedBlockedUserException;
+import org.nistagram.followermicroservice.exception.UserHasBlockedYouException;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import javax.validation.Valid;
 @RequestMapping(value = "/interactions")
 public class InteractionController {
     private final FollowService followService;
-    private final ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     public InteractionController(FollowService followService) {
@@ -26,8 +26,14 @@ public class InteractionController {
 
     @PostMapping("/")
     public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto followRequestDto) {
-        // TODO: process follow request
-        followService.follow(followRequestDto.getFollowerUsername(), followRequestDto.getFolloweeUsername());
-        return new ResponseEntity<>("Follow request processed", HttpStatus.OK);
+        try {
+            followService.follow(followRequestDto.getFollowerUsername(), followRequestDto.getFolloweeUsername());
+            return new ResponseEntity<>("Follow request processed", HttpStatus.OK);
+        } catch (UserHasBlockedYouException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (FollowRequestFailedBlockedUserException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
+        }
+
     }
 }

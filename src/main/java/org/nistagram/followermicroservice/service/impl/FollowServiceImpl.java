@@ -4,6 +4,8 @@ import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.data.repository.InteractionRepository;
 import org.nistagram.followermicroservice.data.repository.UserRepository;
+import org.nistagram.followermicroservice.exception.FollowRequestFailedBlockedUserException;
+import org.nistagram.followermicroservice.exception.UserHasBlockedYouException;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +33,17 @@ public class FollowServiceImpl implements FollowService {
             followingStatus = FollowingStatus.FOLLOWING;
         }
 
-        // TODO: check if relationship already exists
-        interactionRepository.saveRelationship(followerUsername, followeeUsername, followingStatus.toString());
+        if (followee.isBlocked(follower)) {
+            throw new FollowRequestFailedBlockedUserException();
+        }
+
+        if (follower.isBlocked(followee)) {
+            throw new UserHasBlockedYouException();
+        }
+
+        if (!followee.isFollowing(follower) && !followee.isWaitingForApproval(follower)) {
+            interactionRepository.saveRelationship(followerUsername, followeeUsername, followingStatus.toString());
+        }
     }
 
     @Override
