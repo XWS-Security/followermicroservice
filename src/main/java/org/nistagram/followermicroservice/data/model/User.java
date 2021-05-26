@@ -1,6 +1,5 @@
 package org.nistagram.followermicroservice.data.model;
 
-
 import org.neo4j.springframework.data.core.schema.*;
 
 import java.util.HashMap;
@@ -72,5 +71,17 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(username);
+    }
+
+    public boolean isBlocked(User user) {
+        return this.followers.containsKey(user) && this.followers.get(user).getFollowingStatus() == FollowingStatus.BLOCKED;
+    }
+
+    public boolean isFollowing(User user) {
+        return this.followers.containsKey(user) && this.followers.get(user).getFollowingStatus() == FollowingStatus.FOLLOWING;
+    }
+
+    public boolean isWaitingForApproval(User user) {
+        return this.followers.containsKey(user) && this.followers.get(user).getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL;
     }
 }
