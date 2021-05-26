@@ -1,7 +1,10 @@
 package org.nistagram.followermicroservice.service.impl;
 
 import org.nistagram.followermicroservice.controller.dto.EditUserDto;
+import org.nistagram.followermicroservice.data.model.FollowingStatus;
+import org.nistagram.followermicroservice.data.model.Interaction;
 import org.nistagram.followermicroservice.data.model.User;
+import org.nistagram.followermicroservice.data.repository.InteractionRepository;
 import org.nistagram.followermicroservice.data.repository.UserRepository;
 import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
 import org.nistagram.followermicroservice.exception.UsernameAlreadyExistsException;
@@ -9,13 +12,18 @@ import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final InteractionRepository interactionRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, InteractionRepository interactionRepository) {
         this.userRepository = userRepository;
+        this.interactionRepository = interactionRepository;
     }
 
     @Override
@@ -33,7 +41,24 @@ public class UserServiceImpl implements UserService {
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
         }
-        // TODO: if user is switched to public update all follower requests to accepted
+        if (loadedUser.isProfilePrivate() && !editUserDto.isProfilePrivate()) {
+            updatePendingFollowRequests(loadedUser);
+        }
         userRepository.updateProperties(loadedUser.getId(), editUserDto.getUsername(), editUserDto.isProfilePrivate());
+    }
+
+    private void updatePendingFollowRequests(User user) {
+        System.out.println("Updating follow requests...");
+        List<Interaction> modified = new ArrayList<>();
+        user.getFollowers().forEach((user1, interaction) -> {
+            if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
+                interaction.acceptFollowingRequest();
+                modified.add(interaction);
+                System.out.println("Follow request " + interaction.getId() + " should be modified.");
+            }
+        });
+        System.out.println("Interactions to modify: " + modified.size());
+        interactionRepository.saveAll(modified);
+        System.out.println("Interactions saved.");
     }
 }

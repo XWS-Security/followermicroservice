@@ -21,6 +21,12 @@ public class Interaction {
     public Interaction() {
     }
 
+    public Interaction(FollowingStatus followingStatus, boolean muted, boolean notificationsOn) {
+        this.followingStatus = followingStatus;
+        this.muted = muted;
+        this.notificationsOn = notificationsOn;
+    }
+
     public Long getId() {
         return id;
     }
@@ -51,5 +57,9 @@ public class Interaction {
 
     public void setNotificationsOn(boolean notificationsOn) {
         this.notificationsOn = notificationsOn;
+    }
+
+    public void acceptFollowingRequest() {
+        this.followingStatus = FollowingStatus.FOLLOWING;
     }
 }
