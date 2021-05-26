@@ -56,4 +56,9 @@ public class UserController {
 
         return new ResponseEntity<>("User saved", HttpStatus.OK);
     }
+
+    @GetMapping("hit") // Purpose of this method is to show communication between microservices
+    public ResponseEntity<String> hitMeBabyOneMoreTime() {
+        return new ResponseEntity<>("Uspio sam zemo!", HttpStatus.OK);
+    }
 }
