@@ -1,10 +1,7 @@
 package org.nistagram.followermicroservice.data.model;
 
 
-import org.neo4j.springframework.data.core.schema.GeneratedValue;
-import org.neo4j.springframework.data.core.schema.Id;
-import org.neo4j.springframework.data.core.schema.Property;
-import org.neo4j.springframework.data.core.schema.RelationshipProperties;
+import org.neo4j.springframework.data.core.schema.*;
 
 @RelationshipProperties()
 public class Interaction {

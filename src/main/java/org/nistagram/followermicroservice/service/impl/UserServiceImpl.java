@@ -41,24 +41,23 @@ public class UserServiceImpl implements UserService {
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
         }
-        if (loadedUser.isProfilePrivate() && !editUserDto.isProfilePrivate()) {
-            updatePendingFollowRequests(loadedUser);
-        }
+
+        // TODO: update pending follow requests
+//        if (loadedUser.isProfilePrivate() && !editUserDto.isProfilePrivate()) {
+//            updatePendingFollowRequests(loadedUser);
+//        }
         userRepository.updateProperties(loadedUser.getId(), editUserDto.getUsername(), editUserDto.isProfilePrivate());
     }
 
+    // TODO: Fix this (does not update relationships)
     private void updatePendingFollowRequests(User user) {
-        System.out.println("Updating follow requests...");
         List<Interaction> modified = new ArrayList<>();
-        user.getFollowers().forEach((user1, interaction) -> {
+        for (Interaction interaction : user.getFollowers().values()) {
             if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
                 interaction.acceptFollowingRequest();
                 modified.add(interaction);
-                System.out.println("Follow request " + interaction.getId() + " should be modified.");
             }
-        });
-        System.out.println("Interactions to modify: " + modified.size());
+        }
         interactionRepository.saveAll(modified);
-        System.out.println("Interactions saved.");
     }
 }
