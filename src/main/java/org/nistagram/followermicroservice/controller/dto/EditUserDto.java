@@ -1,11 +1,14 @@
 package org.nistagram.followermicroservice.controller.dto;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 public class EditUserDto implements Serializable {
+    @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9_]{2,12}", message = "Username must be 2 to 12 characters long and can contain only letters, numbers and an underscore.")
     private String username;
+    @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9_]{2,12}", message = "Username must be 2 to 12 characters long and can contain only letters, numbers and an underscore.")
     private String oldUsername;
     private boolean profilePrivate = false;
