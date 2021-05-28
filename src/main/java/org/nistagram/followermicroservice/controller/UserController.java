@@ -4,7 +4,10 @@ import org.modelmapper.ModelMapper;
 import org.nistagram.followermicroservice.controller.dto.EditUserDto;
 import org.nistagram.followermicroservice.controller.dto.UserDto;
 import org.nistagram.followermicroservice.data.model.User;
+import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
 import org.nistagram.followermicroservice.exception.UsernameAlreadyExistsException;
+import org.nistagram.followermicroservice.logging.LoggerService;
+import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
 import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
     private final ModelMapper modelMapper = new ModelMapper();
+    private final LoggerService loggerService = new LoggerServiceImpl(this.getClass());
 
     @Autowired
     public UserController(UserService userService) {
@@ -27,9 +31,12 @@ public class UserController {
     @PostMapping("")
     public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) {
         try {
+            loggerService.logCreateUser(userDto.getUsername());
             userService.saveUser(modelMapper.map(userDto, User.class));
+            loggerService.logCreateUserSuccess(userDto.getUsername());
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UsernameAlreadyExistsException e) {
+            loggerService.logCreateUserFail(userDto.getUsername(), e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -37,9 +44,12 @@ public class UserController {
     @PutMapping("")
     public ResponseEntity<String> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
         try {
+            loggerService.logUpdateUser(editUserDto.getUsername(), editUserDto.getOldUsername());
             userService.updateUser(editUserDto);
+            loggerService.logUpdateUserSuccess(editUserDto.getUsername(), editUserDto.getOldUsername());
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UsernameAlreadyExistsException e) {
+        } catch (UsernameAlreadyExistsException | UserDoesNotExistException e) {
+            loggerService.logUpdateUserFail(editUserDto.getUsername(), editUserDto.getOldUsername(), e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

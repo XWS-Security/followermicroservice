@@ -28,11 +28,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void saveUser(User user) throws UsernameAlreadyExistsException {
-        User loadedUser = userRepository.findByUsername(user.getUsername());
-        if (loadedUser != null) {
+        if (isUsernameAvailable(user.getUsername())) {
+            userRepository.save(user);
+        } else {
             throw new UsernameAlreadyExistsException();
         }
-        userRepository.save(user);
     }
 
     @Override
@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
         User loadedUser = userRepository.findByUsername(editUserDto.getOldUsername());
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
+        }
+        if (!isUsernameAvailable(editUserDto.getUsername())) {
+            throw new UsernameAlreadyExistsException();
         }
 
         // TODO: update pending follow requests
@@ -59,5 +62,10 @@ public class UserServiceImpl implements UserService {
             }
         }
         interactionRepository.saveAll(modified);
+    }
+
+    private boolean isUsernameAvailable(String username) {
+        User user = userRepository.findByUsername(username);
+        return user == null;
     }
 }
