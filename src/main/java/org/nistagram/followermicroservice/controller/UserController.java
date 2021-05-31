@@ -38,6 +38,9 @@ public class UserController {
         } catch (UsernameAlreadyExistsException e) {
             loggerService.logCreateUserFail(userDto.getUsername(), e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
         }
     }
 
@@ -51,6 +54,9 @@ public class UserController {
         } catch (UsernameAlreadyExistsException | UserDoesNotExistException e) {
             loggerService.logUpdateUserFail(editUserDto.getUsername(), editUserDto.getOldUsername(), e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
         }
     }
 
