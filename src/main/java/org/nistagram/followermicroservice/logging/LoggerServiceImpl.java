@@ -11,6 +11,11 @@ public class LoggerServiceImpl implements LoggerService {
     }
 
     @Override
+    public void logException(String message) {
+        logger.error("Unexpected exception: { message: {} }", message);
+    }
+
+    @Override
     public void logCreateUser(String username) {
         logger.info("Creating user: { 'username': {} }", username);
     }
@@ -37,6 +42,38 @@ public class LoggerServiceImpl implements LoggerService {
 
     @Override
     public void logUpdateUserFail(String username, String oldUsername, String reason) {
-        logger.error("Updated user failed: { 'username': {}, 'oldUsername': {}, 'reason': {}", username, oldUsername, reason);
+        logger.error("Updated user failed: { 'username': {}, 'oldUsername': {}, 'reason': {} }", username, oldUsername, reason);
+    }
+
+    @Override
+    public void logFollowRequestSent(String follower, String followed) {
+        logger.info("Follow request sent: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestSuccess(String follower, String followed) {
+        logger.info("Follow request saved: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestFailedUserHasBlockedYou(String follower, String followed) {
+        String reason = follower + " is BLOCKED";
+        logFollowRequestFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestFailedUserBlocked(String follower, String followed) {
+        String reason = followed + " is BLOCKED";
+        logFollowRequestFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestFailedUserDoesNotExist(String follower, String followed, String doesNotExist) {
+        String reason = doesNotExist + " does not exist";
+        logFollowRequestFailed(follower, followed, reason);
+    }
+
+    private void logFollowRequestFailed(String follower, String followed, String reason) {
+        logger.error("Follow request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
 }

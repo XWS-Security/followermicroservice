@@ -2,7 +2,10 @@ package org.nistagram.followermicroservice.controller;
 
 import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
 import org.nistagram.followermicroservice.exception.FollowRequestFailedBlockedUserException;
+import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
 import org.nistagram.followermicroservice.exception.UserHasBlockedYouException;
+import org.nistagram.followermicroservice.logging.LoggerService;
+import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import javax.validation.Valid;
 @RequestMapping(value = "/interactions")
 public class InteractionController {
     private final FollowService followService;
+    private final LoggerService loggerService = new LoggerServiceImpl(this.getClass());
 
     @Autowired
     public InteractionController(FollowService followService) {
@@ -25,15 +29,22 @@ public class InteractionController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto followRequestDto) {
+    public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto dto) {
         try {
-            followService.follow(followRequestDto.getFollowerUsername(), followRequestDto.getFolloweeUsername());
+            loggerService.logFollowRequestSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
+            followService.follow(dto.getFollowerUsername(), dto.getFolloweeUsername());
             return new ResponseEntity<>("Follow request processed", HttpStatus.OK);
         } catch (UserHasBlockedYouException e) {
+            loggerService.logFollowRequestFailedUserHasBlockedYou(dto.getFollowerUsername(), dto.getFolloweeUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FollowRequestFailedBlockedUserException e) {
+            loggerService.logFollowRequestFailedUserBlocked(dto.getFollowerUsername(), dto.getFolloweeUsername());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
+        } catch (UserDoesNotExistException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
         }
-
     }
 }
