@@ -12,8 +12,7 @@ import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -41,27 +40,26 @@ public class UserServiceImpl implements UserService {
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
         }
-        if (!isUsernameAvailable(editUserDto.getUsername())) {
+        if (!editUserDto.getOldUsername().equals(editUserDto.getUsername()) && !isUsernameAvailable(editUserDto.getUsername())) {
             throw new UsernameAlreadyExistsException();
         }
 
-        // TODO: update pending follow requests
-//        if (loadedUser.isProfilePrivate() && !editUserDto.isProfilePrivate()) {
-//            updatePendingFollowRequests(loadedUser);
-//        }
+        if (loadedUser.isProfilePrivate() && !editUserDto.isProfilePrivate()) {
+            updatePendingFollowRequests(loadedUser);
+        }
         userRepository.updateProperties(loadedUser.getId(), editUserDto.getUsername(), editUserDto.isProfilePrivate());
     }
 
-    // TODO: Fix this (does not update relationships)
+    // The query number is not optimal here but there have been issues with saveAll function
+    // Also this method is an edge case and is not going to be used very often
     private void updatePendingFollowRequests(User user) {
-        List<Interaction> modified = new ArrayList<>();
-        for (Interaction interaction : user.getFollowers().values()) {
-            if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
-                interaction.acceptFollowingRequest();
-                modified.add(interaction);
+        String followee = user.getUsername();
+        for (Map.Entry<User, Interaction> pair : user.getFollowers().entrySet()) {
+            if (pair.getValue().getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
+                String follower = pair.getKey().getUsername();
+                interactionRepository.updateFollowingStatus(follower, followee, FollowingStatus.FOLLOWING.toString());
             }
         }
-        interactionRepository.saveAll(modified);
     }
 
     private boolean isUsernameAvailable(String username) {
