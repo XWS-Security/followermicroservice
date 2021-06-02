@@ -5,7 +5,7 @@ public interface FollowService {
 
     void unfollow(String followerUsername, String followeeUsername);
 
-    void approveFollowRequest(String followerUsername, String followeeUsername);
+    void acceptFollowRequest(String followerUsername, String followeeUsername);
 
     void rejectFollowRequest(String followerUsername, String followeeUsername);
 }
