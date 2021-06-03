@@ -26,10 +26,10 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public void follow(String followerUsername, String followeeUsername) {
+        validateFollowRequest(followerUsername, followeeUsername);
+
         User follower = userRepository.findByUsername(followerUsername);
         User followee = userRepository.findByUsername(followeeUsername);
-        validateFollowRequest(follower, followee);
-
         FollowingStatus followingStatus;
         if (followee.isProfilePrivate()) {
             followingStatus = FollowingStatus.WAITING_FOR_APPROVAL;
@@ -50,34 +50,35 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public void acceptFollowRequest(String followerUsername, String followeeUsername) {
-        User follower = userRepository.findByUsername(followerUsername);
-        User followee = userRepository.findByUsername(followeeUsername);
-        validateFollowRequest(follower, followee);
+        validateFollowRequest(followerUsername, followeeUsername);
 
         Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
         validateFollowRequestForApproval(interaction);
 
         interactionRepository.updateFollowingStatus(followerUsername, followeeUsername, FollowingStatus.FOLLOWING.toString());
+        loggerService.logFollowRequestApprovalSuccess(followerUsername, followeeUsername);
     }
 
     @Override
     public void rejectFollowRequest(String followerUsername, String followeeUsername) {
-        User follower = userRepository.findByUsername(followerUsername);
-        User followee = userRepository.findByUsername(followeeUsername);
-        validateFollowRequest(follower, followee);
+        validateFollowRequest(followerUsername, followeeUsername);
 
         Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
         validateFollowRequestForApproval(interaction);
 
         interactionRepository.deleteRelationship(followerUsername, followeeUsername);
+        loggerService.logFollowRequestRejectionSuccess(followerUsername, followeeUsername);
     }
 
-    private void validateFollowRequest(User follower, User followee) {
+    private void validateFollowRequest(String followerUsername, String followeeUsername) {
+        User follower = userRepository.findByUsername(followerUsername);
+        User followee = userRepository.findByUsername(followeeUsername);
+
         if (follower == null) {
-            throw new UserDoesNotExistException();
+            throw new UserDoesNotExistException(followerUsername);
         }
         if (followee == null) {
-            throw new UserDoesNotExistException();
+            throw new UserDoesNotExistException(followeeUsername);
         }
         if (followee.isBlocked(follower)) {
             throw new FollowRequestFailedBlockedUserException();

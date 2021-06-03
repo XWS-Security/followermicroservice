@@ -23,5 +23,25 @@ public interface LoggerService {
 
     void logFollowRequestFailedUserBlocked(String follower, String followed);
 
-    void logFollowRequestFailedUserDoesNotExist(String follower, String followed, String doesNotExist);
+    void logFollowRequestFailed(String follower, String followed, String reason);
+
+    void logFollowRequestApprovalSent(String follower, String followed);
+
+    void logFollowRequestApprovalSuccess(String follower, String followed);
+
+    void logFollowRequestApprovalFailedUserHasBlockedYou(String follower, String followed);
+
+    void logFollowRequestApprovalFailedUserBlocked(String follower, String followed);
+
+    void logFollowRequestApprovalFailed(String follower, String followed, String reason);
+
+    void logFollowRequestRejectionSent(String follower, String followed);
+
+    void logFollowRequestRejectionSuccess(String follower, String followed);
+
+    void logFollowRequestRejectionFailedUserHasBlockedYou(String follower, String followed);
+
+    void logFollowRequestRejectionFailedUserBlocked(String follower, String followed);
+
+    void logFollowRequestRejectionFailed(String follower, String followed, String reason);
 }
