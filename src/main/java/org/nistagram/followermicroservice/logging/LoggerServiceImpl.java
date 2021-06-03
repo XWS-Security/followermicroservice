@@ -68,12 +68,61 @@ public class LoggerServiceImpl implements LoggerService {
     }
 
     @Override
-    public void logFollowRequestFailedUserDoesNotExist(String follower, String followed, String doesNotExist) {
-        String reason = doesNotExist + " does not exist";
-        logFollowRequestFailed(follower, followed, reason);
+    public void logFollowRequestFailed(String follower, String followed, String reason) {
+        logger.error("Follow request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
 
-    private void logFollowRequestFailed(String follower, String followed, String reason) {
-        logger.error("Follow request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
+    @Override
+    public void logFollowRequestApprovalSent(String follower, String followed) {
+        logger.info("Follow request approval sent: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestApprovalSuccess(String follower, String followed) {
+        logger.info("Follow request approved: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestApprovalFailedUserHasBlockedYou(String follower, String followed) {
+        String reason = follower + " is BLOCKED";
+        logFollowRequestApprovalFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestApprovalFailedUserBlocked(String follower, String followed) {
+        String reason = followed + " is BLOCKED";
+        logFollowRequestApprovalFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestApprovalFailed(String follower, String followed, String reason) {
+        logger.error("Follow request approval failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestRejectionSent(String follower, String followed) {
+        logger.info("Follow request rejection sent: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestRejectionSuccess(String follower, String followed) {
+        logger.info("Follow request rejected: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logFollowRequestRejectionFailedUserHasBlockedYou(String follower, String followed) {
+        String reason = follower + " is BLOCKED";
+        logFollowRequestApprovalFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestRejectionFailedUserBlocked(String follower, String followed) {
+        String reason = followed + " is BLOCKED";
+        logFollowRequestApprovalFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logFollowRequestRejectionFailed(String follower, String followed, String reason) {
+        logger.error("Follow request rejection failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
 }
