@@ -45,7 +45,13 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public void unfollow(String followerUsername, String followeeUsername) {
-        // TODO:
+        validateFollowRequest(followerUsername, followeeUsername);
+
+        Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
+        validateFollowRequestForUnfollow(interaction);
+
+        interactionRepository.deleteRelationship(followerUsername, followeeUsername);
+        loggerService.logUnfollowRequestSuccess(followerUsername, followeeUsername);
     }
 
     @Override
@@ -94,6 +100,15 @@ public class FollowServiceImpl implements FollowService {
         }
         if (followRequest.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
             throw new FollowRequestIsAlreadyAcceptedException();
+        }
+    }
+
+    private void validateFollowRequestForUnfollow(Interaction followRequest) {
+        if (followRequest == null) {
+            throw new FollowRequestDoesNotExistException();
+        }
+        if (followRequest.getFollowingStatus() != FollowingStatus.FOLLOWING && followRequest.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
+            throw new UserIsNotFollowedException();
         }
     }
 }
