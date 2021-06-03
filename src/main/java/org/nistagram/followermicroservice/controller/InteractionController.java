@@ -44,7 +44,28 @@ public class InteractionController {
         }
     }
 
-    @PutMapping("/acceptRequest")
+    @PutMapping("/")
+    public ResponseEntity<String> unfollow(@RequestBody @Valid FollowRequestDto dto) {
+        try {
+            loggerService.logUnfollowRequestSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
+            followService.unfollow(dto.getFollowerUsername(), dto.getFolloweeUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (InvalidFollowRequestUserIsBlockedException e) {
+            loggerService.logUnfollowRequestFailedUserHasBlockedYou(dto.getFollowerUsername(), dto.getFolloweeUsername());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (FollowRequestFailedBlockedUserException e) {
+            loggerService.logUnfollowRequestFailedUserBlocked(dto.getFollowerUsername(), dto.getFolloweeUsername());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
+        } catch (UserDoesNotExistException | FollowRequestDoesNotExistException | UserIsNotFollowedException e) {
+            loggerService.logUnfollowRequestFailed(dto.getFollowerUsername(), dto.getFolloweeUsername(), e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
+        }
+    }
+
+    @PutMapping("/accept")
     public ResponseEntity<String> acceptFollowRequest(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logFollowRequestApprovalSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
@@ -65,7 +86,7 @@ public class InteractionController {
         }
     }
 
-    @PutMapping("/rejectRequest")
+    @PutMapping("/reject")
     public ResponseEntity<String> rejectFollowRequest(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logFollowRequestRejectionSent(dto.getFollowerUsername(), dto.getFolloweeUsername());

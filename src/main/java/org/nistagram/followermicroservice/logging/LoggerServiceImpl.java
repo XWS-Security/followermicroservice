@@ -125,4 +125,31 @@ public class LoggerServiceImpl implements LoggerService {
     public void logFollowRequestRejectionFailed(String follower, String followed, String reason) {
         logger.error("Follow request rejection failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
+
+    @Override
+    public void logUnfollowRequestSent(String follower, String followed) {
+        logger.info("Unfollow request sent: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logUnfollowRequestSuccess(String follower, String followed) {
+        logger.info("Unfollow successful, relationship delted: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logUnfollowRequestFailedUserHasBlockedYou(String follower, String followed) {
+        String reason = follower + " is BLOCKED";
+        logUnfollowRequestFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logUnfollowRequestFailedUserBlocked(String follower, String followed) {
+        String reason = follower + " is BLOCKED";
+        logUnfollowRequestFailed(follower, followed, reason);
+    }
+
+    @Override
+    public void logUnfollowRequestFailed(String follower, String followed, String reason) {
+        logger.error("Unfollow request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
+    }
 }

@@ -44,4 +44,14 @@ public interface LoggerService {
     void logFollowRequestRejectionFailedUserBlocked(String follower, String followed);
 
     void logFollowRequestRejectionFailed(String follower, String followed, String reason);
+
+    void logUnfollowRequestSent(String follower, String followed);
+
+    void logUnfollowRequestSuccess(String follower, String followed);
+
+    void logUnfollowRequestFailedUserHasBlockedYou(String follower, String followed);
+
+    void logUnfollowRequestFailedUserBlocked(String follower, String followed);
+
+    void logUnfollowRequestFailed(String follower, String followed, String reason);
 }
