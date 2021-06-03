@@ -13,4 +13,7 @@ public interface InteractionRepository extends Neo4jRepository<Interaction, Long
 
     @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) RETURN r")
     Interaction getRelationship(String followerUsername, String followeeUsername);
+
+    @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) DELETE r")
+    void deleteRelationship(String followerUsername, String followeeUsername);
 }

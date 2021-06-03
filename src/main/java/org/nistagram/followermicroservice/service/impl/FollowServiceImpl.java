@@ -28,7 +28,6 @@ public class FollowServiceImpl implements FollowService {
     public void follow(String followerUsername, String followeeUsername) {
         User follower = userRepository.findByUsername(followerUsername);
         User followee = userRepository.findByUsername(followeeUsername);
-
         validateFollowRequest(follower, followee);
 
         FollowingStatus followingStatus;
@@ -53,17 +52,10 @@ public class FollowServiceImpl implements FollowService {
     public void acceptFollowRequest(String followerUsername, String followeeUsername) {
         User follower = userRepository.findByUsername(followerUsername);
         User followee = userRepository.findByUsername(followeeUsername);
-
         validateFollowRequest(follower, followee);
 
         Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
-        if (interaction == null) {
-            throw new FollowRequestDoesNotExistException();
-        }
-
-        if (interaction.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
-            throw new FollowRequestIsAlreadyAcceptedException();
-        }
+        validateFollowRequestForApproval(interaction);
 
         interactionRepository.updateFollowingStatus(followerUsername, followeeUsername, FollowingStatus.FOLLOWING.toString());
     }
@@ -72,19 +64,12 @@ public class FollowServiceImpl implements FollowService {
     public void rejectFollowRequest(String followerUsername, String followeeUsername) {
         User follower = userRepository.findByUsername(followerUsername);
         User followee = userRepository.findByUsername(followeeUsername);
-
         validateFollowRequest(follower, followee);
 
         Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
-        if (interaction == null) {
-            throw new FollowRequestDoesNotExistException();
-        }
+        validateFollowRequestForApproval(interaction);
 
-        if (interaction.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
-            throw new FollowRequestIsAlreadyAcceptedException();
-        }
-
-        // TODO: Delete interaction
+        interactionRepository.deleteRelationship(followerUsername, followeeUsername);
     }
 
     private void validateFollowRequest(User follower, User followee) {
@@ -99,6 +84,15 @@ public class FollowServiceImpl implements FollowService {
         }
         if (follower.isBlocked(followee)) {
             throw new InvalidFollowRequestUserIsBlockedException();
+        }
+    }
+
+    private void validateFollowRequestForApproval(Interaction followRequest) {
+        if (followRequest == null) {
+            throw new FollowRequestDoesNotExistException();
+        }
+        if (followRequest.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
+            throw new FollowRequestIsAlreadyAcceptedException();
         }
     }
 }
