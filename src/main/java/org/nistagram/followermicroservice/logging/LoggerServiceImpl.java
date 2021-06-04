@@ -16,6 +16,11 @@ public class LoggerServiceImpl implements LoggerService {
     }
 
     @Override
+    public void logValidationFailed(String message) {
+        logger.error("Validation failed: { message: {} }", message);
+    }
+
+    @Override
     public void logCreateUser(String username) {
         logger.info("Creating user: { 'username': {} }", username);
     }
