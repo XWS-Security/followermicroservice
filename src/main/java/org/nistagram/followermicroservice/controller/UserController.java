@@ -12,8 +12,10 @@ import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 
 @RestController
@@ -63,5 +65,19 @@ public class UserController {
     @GetMapping("hit") // Purpose of this method is to show communication between microservices
     public ResponseEntity<String> hitMeBabyOneMoreTime() {
         return new ResponseEntity<>("Uspio sam zemo!", HttpStatus.OK);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
     }
 }

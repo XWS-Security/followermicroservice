@@ -1,26 +1,37 @@
 package org.nistagram.followermicroservice.controller;
 
 import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
+import org.nistagram.followermicroservice.controller.dto.InteractionDto;
 import org.nistagram.followermicroservice.exception.*;
 import org.nistagram.followermicroservice.logging.LoggerService;
 import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
 import org.nistagram.followermicroservice.service.FollowService;
+import org.nistagram.followermicroservice.service.ResourcesService;
+import org.nistagram.followermicroservice.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/interactions")
+@Validated
 public class InteractionController {
     private final FollowService followService;
+    private final ResourcesService resourcesService;
     private final LoggerService loggerService = new LoggerServiceImpl(this.getClass());
 
     @Autowired
-    public InteractionController(FollowService followService) {
+    public InteractionController(FollowService followService, ResourcesService resourcesService) {
         this.followService = followService;
+        this.resourcesService = resourcesService;
     }
 
     @PostMapping("/")
@@ -105,5 +116,31 @@ public class InteractionController {
             loggerService.logException(e.getMessage());
             return new ResponseEntity<>("Something went wrong", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/waiting/{username}")
+    public ResponseEntity<List<InteractionDto>> getWaitingForApproval(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+        try {
+            // TODO: log
+            List<InteractionDto> result = resourcesService.getWaitingForApproval(username);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
     }
 }
