@@ -12,6 +12,7 @@ import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +48,7 @@ public class UserController {
     }
 
     @PutMapping("")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
         try {
             loggerService.logUpdateUser(editUserDto.getUsername(), editUserDto.getOldUsername());
@@ -63,6 +65,7 @@ public class UserController {
     }
 
     @GetMapping("hit") // Purpose of this method is to show communication between microservices
+//    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> hitMeBabyOneMoreTime() {
         return new ResponseEntity<>("Uspio sam zemo!", HttpStatus.OK);
     }

@@ -3,8 +3,10 @@ package org.nistagram.followermicroservice.service.impl;
 import org.nistagram.followermicroservice.controller.dto.EditUserDto;
 import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.Interaction;
+import org.nistagram.followermicroservice.data.model.Role;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.data.repository.InteractionRepository;
+import org.nistagram.followermicroservice.data.repository.RoleRepository;
 import org.nistagram.followermicroservice.data.repository.UserRepository;
 import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
 import org.nistagram.followermicroservice.exception.UsernameAlreadyExistsException;
@@ -12,22 +14,27 @@ import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final InteractionRepository interactionRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, InteractionRepository interactionRepository) {
+    public UserServiceImpl(UserRepository userRepository, InteractionRepository interactionRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.interactionRepository = interactionRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
     public void saveUser(User user) throws UsernameAlreadyExistsException {
         if (isUsernameAvailable(user.getUsername())) {
+            List<Role> roles = roleRepository.findByName(user.getAdministrationRole());
+            user.setRoles(roles);
             userRepository.save(user);
         } else {
             throw new UsernameAlreadyExistsException();
