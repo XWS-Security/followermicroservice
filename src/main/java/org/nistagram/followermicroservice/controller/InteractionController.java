@@ -11,6 +11,7 @@ import org.nistagram.followermicroservice.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ public class InteractionController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logFollowRequestSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
@@ -56,6 +58,7 @@ public class InteractionController {
     }
 
     @PutMapping("/")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> unfollow(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logUnfollowRequestSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
@@ -77,6 +80,7 @@ public class InteractionController {
     }
 
     @PutMapping("/accept")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> acceptFollowRequest(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logFollowRequestApprovalSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
@@ -98,6 +102,7 @@ public class InteractionController {
     }
 
     @PutMapping("/reject")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> rejectFollowRequest(@RequestBody @Valid FollowRequestDto dto) {
         try {
             loggerService.logFollowRequestRejectionSent(dto.getFollowerUsername(), dto.getFolloweeUsername());
@@ -119,6 +124,7 @@ public class InteractionController {
     }
 
     @GetMapping("/waiting/{username}")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<List<InteractionDto>> getWaitingForApproval(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         try {
             // TODO: log
