@@ -41,6 +41,16 @@ public class ResourcesServiceImpl implements ResourcesService {
         return interaction.getFollowingStatus().toString();
     }
 
+    @Override
+    public int getNumOfFollowers(String username) {
+        return interactionRepository.getNumberOfFollowers(username);
+    }
+
+    @Override
+    public int getNumOfFollowing(String username) {
+        return interactionRepository.getNumberOfFollowing(username);
+    }
+
     private User getCurrentlyLoggedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }

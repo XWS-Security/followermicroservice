@@ -21,4 +21,10 @@ public interface InteractionRepository extends Neo4jRepository<Interaction, Long
 
     @Query("MATCH (u1:NistagramUser)-[r:FOLLOWING]->(u2:NistagramUser {username: $0}) WHERE r.followingStatus = 'WAITING_FOR_APPROVAL' RETURN u1.username")
     List<String> findAllWaiting(String username);
+
+    @Query("MATCH (follower:NistagramUser)-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:NistagramUser {username: $0}) RETURN count(follower)")
+    int getNumberOfFollowers(String username);
+
+    @Query("MATCH (follower:NistagramUser {username: $0})-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:NistagramUser) RETURN count(followee)")
+    int getNumberOfFollowing(String username);
 }
