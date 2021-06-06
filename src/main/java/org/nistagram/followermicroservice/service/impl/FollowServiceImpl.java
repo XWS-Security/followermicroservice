@@ -10,6 +10,7 @@ import org.nistagram.followermicroservice.logging.LoggerService;
 import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,11 +26,11 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public void follow(String followerUsername, String followeeUsername) {
-        validateFollowRequest(followerUsername, followeeUsername);
-
-        User follower = userRepository.findByUsername(followerUsername);
+    public void follow(String followeeUsername) {
+        User follower = getCurrentlyLoggedUser();
         User followee = userRepository.findByUsername(followeeUsername);
+        validateFollowRequest(follower, followee, follower.getUsername(), followeeUsername);
+
         FollowingStatus followingStatus;
         if (followee.isProfilePrivate()) {
             followingStatus = FollowingStatus.WAITING_FOR_APPROVAL;
@@ -38,48 +39,59 @@ public class FollowServiceImpl implements FollowService {
         }
 
         if (!followee.isFollowing(follower) && !followee.isWaitingForApproval(follower)) {
-            interactionRepository.saveRelationship(followerUsername, followeeUsername, followingStatus.toString());
-            loggerService.logFollowRequestSuccess(followerUsername, followeeUsername);
+            interactionRepository.saveRelationship(follower.getUsername(), followeeUsername, followingStatus.toString());
+            loggerService.logFollowRequestSuccess(follower.getUsername(), followeeUsername);
         }
     }
 
     @Override
-    public void unfollow(String followerUsername, String followeeUsername) {
-        validateFollowRequest(followerUsername, followeeUsername);
+    public void unfollow(String followeeUsername) {
+        User follower = getCurrentlyLoggedUser();
+        User followee = userRepository.findByUsername(followeeUsername);
+        validateFollowRequest(follower, followee, follower.getUsername(), followeeUsername);
 
-        Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
+        Interaction interaction = interactionRepository.findRelationship(follower.getUsername(), followeeUsername);
         validateFollowRequestForUnfollow(interaction);
 
-        interactionRepository.deleteRelationship(followerUsername, followeeUsername);
-        loggerService.logUnfollowRequestSuccess(followerUsername, followeeUsername);
+        interactionRepository.deleteRelationship(follower.getUsername(), followeeUsername);
+        loggerService.logUnfollowRequestSuccess(follower.getUsername(), followeeUsername);
     }
 
     @Override
-    public void acceptFollowRequest(String followerUsername, String followeeUsername) {
-        validateFollowRequest(followerUsername, followeeUsername);
-
-        Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
-        validateFollowRequestForApproval(interaction);
-
-        interactionRepository.updateFollowingStatus(followerUsername, followeeUsername, FollowingStatus.FOLLOWING.toString());
-        loggerService.logFollowRequestApprovalSuccess(followerUsername, followeeUsername);
-    }
-
-    @Override
-    public void rejectFollowRequest(String followerUsername, String followeeUsername) {
-        validateFollowRequest(followerUsername, followeeUsername);
-
-        Interaction interaction = interactionRepository.getRelationship(followerUsername, followeeUsername);
-        validateFollowRequestForApproval(interaction);
-
-        interactionRepository.deleteRelationship(followerUsername, followeeUsername);
-        loggerService.logFollowRequestRejectionSuccess(followerUsername, followeeUsername);
-    }
-
-    private void validateFollowRequest(String followerUsername, String followeeUsername) {
+    public void acceptFollowRequest(String followerUsername) {
         User follower = userRepository.findByUsername(followerUsername);
-        User followee = userRepository.findByUsername(followeeUsername);
+        User followee = getCurrentlyLoggedUser();
+        validateFollowRequest(follower, followee, followerUsername, followee.getUsername());
 
+        Interaction interaction = interactionRepository.findRelationship(followerUsername, followee.getUsername());
+        validateFollowRequestForApproval(interaction);
+
+        interactionRepository.updateFollowingStatus(followerUsername, followee.getUsername(), FollowingStatus.FOLLOWING.toString());
+        loggerService.logFollowRequestApprovalSuccess(followerUsername, followee.getUsername());
+    }
+
+    @Override
+    public void rejectFollowRequest(String followerUsername) {
+        User follower = userRepository.findByUsername(followerUsername);
+        User followee = getCurrentlyLoggedUser();
+        validateFollowRequest(follower, followee, followerUsername, followee.getUsername());
+
+        Interaction interaction = interactionRepository.findRelationship(followerUsername, followee.getUsername());
+        validateFollowRequestForApproval(interaction);
+
+        interactionRepository.deleteRelationship(followerUsername, followee.getUsername());
+        loggerService.logFollowRequestRejectionSuccess(followerUsername, followee.getUsername());
+    }
+
+    private User getCurrentlyLoggedUser() {
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().equals("anonymousUser")) {
+            return null;
+        } else {
+            return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        }
+    }
+
+    private void validateFollowRequest(User follower, User followee, String followerUsername, String followeeUsername) {
         if (follower == null) {
             throw new UserDoesNotExistException(followerUsername);
         }

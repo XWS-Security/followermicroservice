@@ -5,5 +5,6 @@ import org.nistagram.followermicroservice.controller.dto.InteractionDto;
 import java.util.List;
 
 public interface ResourcesService {
-    List<InteractionDto> getWaitingForApproval(String username);
+    List<InteractionDto> getWaitingForApproval();
+    String getFollowingStatus(String username);
 }

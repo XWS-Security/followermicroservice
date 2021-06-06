@@ -22,6 +22,6 @@ public class FollowermicroserviceApplication {
         Role role = new Role("NISTAGRAM_USER_ROLE");
         List<Role> roles = new ArrayList<>();
         roles.add(role);
-        roleRepository.save(role);
+//        roleRepository.save(role);
     }
 }
