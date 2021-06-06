@@ -9,27 +9,16 @@ import java.io.Serializable;
 public class FollowRequestDto implements Serializable {
     @NotNull
     @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE)
-    private String followerUsername;
-    @NotNull
-    @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE)
-    private String followeeUsername;
+    private String username;
 
     public FollowRequestDto() {
     }
 
-    public String getFollowerUsername() {
-        return followerUsername;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFollowerUsername(String followerUsername) {
-        this.followerUsername = followerUsername;
-    }
-
-    public String getFolloweeUsername() {
-        return followeeUsername;
-    }
-
-    public void setFolloweeUsername(String followeeUsername) {
-        this.followeeUsername = followeeUsername;
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

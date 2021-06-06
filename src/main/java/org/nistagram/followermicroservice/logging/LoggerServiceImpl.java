@@ -138,7 +138,7 @@ public class LoggerServiceImpl implements LoggerService {
 
     @Override
     public void logUnfollowRequestSuccess(String follower, String followed) {
-        logger.info("Unfollow successful, relationship delted: {'from': {}, 'to': {} }", follower, followed);
+        logger.info("Unfollow successful, relationship deleted: {'from': {}, 'to': {} }", follower, followed);
     }
 
     @Override

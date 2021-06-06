@@ -1,11 +1,11 @@
 package org.nistagram.followermicroservice.service;
 
 public interface FollowService {
-    void follow(String followerUsername, String followeeUsername);
+    void follow(String followeeUsername);
 
-    void unfollow(String followerUsername, String followeeUsername);
+    void unfollow(String followeeUsername);
 
-    void acceptFollowRequest(String followerUsername, String followeeUsername);
+    void acceptFollowRequest(String followeeUsername);
 
-    void rejectFollowRequest(String followerUsername, String followeeUsername);
+    void rejectFollowRequest(String followeeUsername);
 }
