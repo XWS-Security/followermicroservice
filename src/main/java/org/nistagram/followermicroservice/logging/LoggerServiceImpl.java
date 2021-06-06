@@ -21,6 +21,11 @@ public class LoggerServiceImpl implements LoggerService {
     }
 
     @Override
+    public void logTokenException(String message) {
+        logger.error("Token issue: {message: {} }", message);
+    }
+
+    @Override
     public void logCreateUser(String username) {
         logger.info("Creating user: { 'username': {} }", username);
     }

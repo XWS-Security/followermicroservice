@@ -1,6 +1,7 @@
 package org.nistagram.followermicroservice.controller;
 
 import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
+import org.nistagram.followermicroservice.controller.dto.FollowingNumbersDto;
 import org.nistagram.followermicroservice.controller.dto.InteractionDto;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.*;
@@ -148,6 +149,32 @@ public class InteractionController {
         try {
             // TODO: log
             String result = resourcesService.getFollowingStatus(username);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/numbers/{username}")
+    public ResponseEntity<FollowingNumbersDto> getFollowingStats(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+        try {
+            // TODO: log
+            var result = new FollowingNumbersDto(resourcesService.getNumOfFollowers(username), resourcesService.getNumOfFollowing(username));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/numbers")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
+    public ResponseEntity<FollowingNumbersDto> getFollowingStats() {
+        try {
+            // TODO: log
+            String username = getCurrentlyLoggedUser().getUsername();
+            var result = new FollowingNumbersDto(resourcesService.getNumOfFollowers(username), resourcesService.getNumOfFollowing(username));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());

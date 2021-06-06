@@ -5,6 +5,8 @@ public interface LoggerService {
 
     void logValidationFailed(String message);
 
+    void logTokenException(String message);
+
     void logCreateUser(String username);
 
     void logCreateUserSuccess(String username);
