@@ -168,20 +168,6 @@ public class InteractionController {
         }
     }
 
-    @GetMapping("/numbers")
-    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<FollowingNumbersDto> getFollowingStats() {
-        try {
-            // TODO: log
-            String username = getCurrentlyLoggedUser().getUsername();
-            var result = new FollowingNumbersDto(resourcesService.getNumOfFollowers(username), resourcesService.getNumOfFollowing(username));
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            loggerService.logException(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {

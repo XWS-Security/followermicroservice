@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
-@Node("NistagramUser")
+@Node("FNistagramUser")
 public class User implements UserDetails {
     @Transient
     private final String administrationRole = "NISTAGRAM_USER_ROLE";

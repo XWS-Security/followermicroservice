@@ -7,6 +7,6 @@ import org.nistagram.followermicroservice.data.model.User;
 public interface UserRepository extends Neo4jRepository<User, Long> {
     User findByUsername(String username);
 
-    @Query("MATCH (p:NistagramUser) WHERE id(p) = $0 SET p.username = $1, p.private = $2 RETURN p")
+    @Query("MATCH (p:FNistagramUser) WHERE id(p) = $0 SET p.username = $1, p.private = $2 RETURN p")
     User updateProperties(Long id, String username, boolean profilePrivate);
 }
