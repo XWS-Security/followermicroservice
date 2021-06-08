@@ -8,4 +8,6 @@ public interface FollowService {
     void acceptFollowRequest(String followeeUsername);
 
     void rejectFollowRequest(String followeeUsername);
+
+    void validateAccess(String follower, String followee);
 }

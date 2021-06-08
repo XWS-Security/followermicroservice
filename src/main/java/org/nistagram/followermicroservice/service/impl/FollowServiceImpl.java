@@ -83,6 +83,23 @@ public class FollowServiceImpl implements FollowService {
         loggerService.logFollowRequestRejectionSuccess(followerUsername, followee.getUsername());
     }
 
+    @Override
+    public void validateAccess(String follower, String followee) {
+        Interaction interaction = interactionRepository.findRelationship(follower, followee);
+
+        if (interaction == null) {
+            throw new FollowRequestDoesNotExistException();
+        }
+
+        if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
+            throw new FollowRequestNotApprovedException();
+        }
+
+        if (interaction.getFollowingStatus() == FollowingStatus.BLOCKED) {
+            throw new InvalidFollowRequestUserIsBlockedException();
+        }
+    }
+
     private User getCurrentlyLoggedUser() {
         if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().equals("anonymousUser")) {
             return null;
