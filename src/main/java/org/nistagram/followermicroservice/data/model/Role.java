@@ -5,7 +5,7 @@ import org.neo4j.springframework.data.core.schema.Id;
 import org.neo4j.springframework.data.core.schema.Node;
 import org.neo4j.springframework.data.core.schema.Property;
 
-@Node("FAuthRole")
+@Node("AuthRole")
 public class Role {
     @Id
     @GeneratedValue
