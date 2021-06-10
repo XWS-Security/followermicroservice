@@ -7,24 +7,24 @@ import org.nistagram.followermicroservice.data.model.Interaction;
 import java.util.List;
 
 public interface InteractionRepository extends Neo4jRepository<Interaction, Long> {
-    @Query("MATCH (u1:FNistagramUser {username: $0}), (u2:FNistagramUser {username: $1}) CREATE (u1)-[r:FOLLOWING {followingStatus: $2, muted: false, notificationsOn: false}]->(u2) RETURN r")
+    @Query("MATCH (u1:NistagramUser {username: $0}), (u2:NistagramUser {username: $1}) CREATE (u1)-[r:FOLLOWING {followingStatus: $2, muted: false, notificationsOn: false}]->(u2) RETURN r")
     Interaction saveRelationship(String followerUsername, String followeeUsername, String followingStatus);
 
-    @Query("MATCH (u1:FNistagramUser {username: $0})-[r:FOLLOWING]->(u2:FNistagramUser {username: $1}) SET r.followingStatus = $2 RETURN r")
+    @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) SET r.followingStatus = $2 RETURN r")
     Interaction updateFollowingStatus(String followerUsername, String followeeUsername, String followingStatus);
 
-    @Query("MATCH (u1:FNistagramUser {username: $0})-[r:FOLLOWING]->(u2:FNistagramUser {username: $1}) RETURN r")
+    @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) RETURN r")
     Interaction findRelationship(String followerUsername, String followeeUsername);
 
-    @Query("MATCH (u1:FNistagramUser {username: $0})-[r:FOLLOWING]->(u2:FNistagramUser {username: $1}) DELETE r")
+    @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) DELETE r")
     void deleteRelationship(String followerUsername, String followeeUsername);
 
-    @Query("MATCH (u1:FNistagramUser)-[r:FOLLOWING]->(u2:FNistagramUser {username: $0}) WHERE r.followingStatus = 'WAITING_FOR_APPROVAL' RETURN u1.username")
+    @Query("MATCH (u1:NistagramUser)-[r:FOLLOWING]->(u2:NistagramUser {username: $0}) WHERE r.followingStatus = 'WAITING_FOR_APPROVAL' RETURN u1.username")
     List<String> findAllWaiting(String username);
 
-    @Query("MATCH (follower:FNistagramUser)-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:FNistagramUser {username: $0}) RETURN count(follower)")
+    @Query("MATCH (follower:NistagramUser)-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:NistagramUser {username: $0}) RETURN count(follower)")
     int getNumberOfFollowers(String username);
 
-    @Query("MATCH (follower:FNistagramUser {username: $0})-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:FNistagramUser) RETURN count(followee)")
+    @Query("MATCH (follower:NistagramUser {username: $0})-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:NistagramUser) RETURN count(followee)")
     int getNumberOfFollowing(String username);
 }
