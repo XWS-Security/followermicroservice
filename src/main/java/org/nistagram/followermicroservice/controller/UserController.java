@@ -14,6 +14,7 @@ import org.nistagram.followermicroservice.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("")
-//    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
         try {
             loggerService.logUpdateUser(editUserDto.getUsername(), editUserDto.getOldUsername());
@@ -69,6 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/hasAccess/{follower}/{followee}")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<HasAccessResponseDto> hasAccess(
             @PathVariable("follower") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String follower,
             @PathVariable("followee") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String followee) {
