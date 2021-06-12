@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,26 +70,20 @@ public class UserController {
         }
     }
 
-    @GetMapping("/hasAccess/{follower}/{followee}")
+    @GetMapping("/hasAccess/{username}")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<HasAccessResponseDto> hasAccess(
-            @PathVariable("follower") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String follower,
-            @PathVariable("followee") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String followee) {
+            @PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+        String currentUser = getCurrentlyLoggedUser().getUsername();
         try {
-            followService.validateAccess(follower, followee);
+            loggerService.logValidateAccessRequestSent(currentUser, username);
+            followService.validateAccess(username);
             var result = new HasAccessResponseDto(true, "");
+            loggerService.logValidateAccessRequestSuccess(currentUser, username);
             return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (FollowRequestDoesNotExistException e) {
-            // TODO: log
+        } catch (FollowRequestDoesNotExistException | InvalidFollowRequestUserIsBlockedException | FollowRequestNotApprovedException e) {
             var result = new HasAccessResponseDto(false, e.getMessage());
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (FollowRequestNotApprovedException e) {
-            // TODO: log
-            var result = new HasAccessResponseDto(false, e.getMessage());
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (InvalidFollowRequestUserIsBlockedException e) {
-            // TODO: log
-            var result = new HasAccessResponseDto(false, e.getMessage());
+            loggerService.logValidateAccessRequestFail(currentUser, username, e.getMessage());
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
@@ -114,5 +109,9 @@ public class UserController {
     ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         loggerService.logValidationFailed(e.getMessage());
         return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
+    }
+
+    private User getCurrentlyLoggedUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

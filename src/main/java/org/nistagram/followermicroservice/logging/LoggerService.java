@@ -58,4 +58,10 @@ public interface LoggerService {
     void logUnfollowRequestFailedUserBlocked(String follower, String followed);
 
     void logUnfollowRequestFailed(String follower, String followed, String reason);
+
+    void logValidateAccessRequestSent(String follower, String followed);
+
+    void logValidateAccessRequestSuccess(String follower, String followed);
+
+    void logValidateAccessRequestFail(String follower, String followed, String reason);
 }

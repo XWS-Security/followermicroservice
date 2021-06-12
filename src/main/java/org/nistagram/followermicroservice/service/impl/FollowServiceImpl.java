@@ -84,8 +84,9 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public void validateAccess(String follower, String followee) {
-        Interaction interaction = interactionRepository.findRelationship(follower, followee);
+    public void validateAccess(String username) {
+        String currentUsername = getCurrentlyLoggedUser().getUsername();
+        Interaction interaction = interactionRepository.findRelationship(currentUsername, username);
 
         if (interaction == null) {
             throw new FollowRequestDoesNotExistException();
