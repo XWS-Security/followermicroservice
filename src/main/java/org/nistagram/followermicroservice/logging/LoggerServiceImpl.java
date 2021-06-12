@@ -162,4 +162,19 @@ public class LoggerServiceImpl implements LoggerService {
     public void logUnfollowRequestFailed(String follower, String followed, String reason) {
         logger.error("Unfollow request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
+
+    @Override
+    public void logValidateAccessRequestSent(String follower, String followed) {
+        logger.info("Validate access request sent: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logValidateAccessRequestSuccess(String follower, String followed) {
+        logger.info("Validate access request success: {'from': {}, 'to': {} }", follower, followed);
+    }
+
+    @Override
+    public void logValidateAccessRequestFail(String follower, String followed, String reason) {
+        logger.info("Validate access request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
+    }
 }

@@ -9,5 +9,5 @@ public interface FollowService {
 
     void rejectFollowRequest(String followeeUsername);
 
-    void validateAccess(String follower, String followee);
+    void validateAccess(String username);
 }

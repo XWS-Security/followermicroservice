@@ -12,6 +12,7 @@ import org.nistagram.followermicroservice.exception.UserDoesNotExistException;
 import org.nistagram.followermicroservice.exception.UsernameAlreadyExistsException;
 import org.nistagram.followermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(EditUserDto editUserDto) {
-        User loadedUser = userRepository.findByUsername(editUserDto.getOldUsername());
+        User loadedUser = getCurrentlyLoggedUser();
         if (loadedUser == null) {
             throw new UserDoesNotExistException();
         }
@@ -72,5 +73,9 @@ public class UserServiceImpl implements UserService {
     private boolean isUsernameAvailable(String username) {
         User user = userRepository.findByUsername(username);
         return user == null;
+    }
+
+    private User getCurrentlyLoggedUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }
