@@ -2,6 +2,7 @@ package org.nistagram.followermicroservice.controller;
 
 import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
 import org.nistagram.followermicroservice.controller.dto.FollowingNumbersDto;
+import org.nistagram.followermicroservice.controller.dto.FollowingStatusDto;
 import org.nistagram.followermicroservice.controller.dto.InteractionDto;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.*;
@@ -149,10 +150,11 @@ public class InteractionController {
 
     @GetMapping("/{username}")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<String> getFollowingStatus(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+    public ResponseEntity<FollowingStatusDto> getFollowingStatus(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         try {
             // TODO: log
-            String result = resourcesService.getFollowingStatus(username);
+            FollowingStatusDto result = resourcesService.getFollowingStatus(username);
+            System.out.println(result);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());

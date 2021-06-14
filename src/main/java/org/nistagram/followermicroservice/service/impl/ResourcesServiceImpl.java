@@ -1,5 +1,6 @@
 package org.nistagram.followermicroservice.service.impl;
 
+import org.nistagram.followermicroservice.controller.dto.FollowingStatusDto;
 import org.nistagram.followermicroservice.controller.dto.InteractionDto;
 import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.Interaction;
@@ -32,13 +33,33 @@ public class ResourcesServiceImpl implements ResourcesService {
     }
 
     @Override
-    public String getFollowingStatus(String username) {
+    public FollowingStatusDto getFollowingStatus(String username) {
         User user = getCurrentlyLoggedUser();
         Interaction interaction = interactionRepository.findRelationship(user.getUsername(), username);
+        System.out.println("Follower: " + user.getUsername() + ", followee: " + username);
         if (interaction == null) {
-            return "NOT_FOLLOWING";
+            System.out.println("Interaction does not exist");
+            Interaction reverse = interactionRepository.findRelationship(username, user.getUsername());
+            if (reverse == null) {
+                System.out.println("Reverse does not exist");
+                return new FollowingStatusDto("NOT_FOLLOWING", null);
+            }
+            if (reverse.getFollowingStatus() == FollowingStatus.FOLLOWING) {
+                return new FollowingStatusDto("FOLLOWS_YOU", null);
+            }
+            return new FollowingStatusDto("NOT_FOLLOWING", null);
         }
-        return interaction.getFollowingStatus().toString();
+
+        if (interaction.getFollowingStatus() == FollowingStatus.FOLLOWING) {
+            String notifications = interaction.isNotificationsOn() ? "ON" : "OFF";
+            return new FollowingStatusDto("FOLLOWING", notifications);
+        }
+
+        if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
+            return new FollowingStatusDto("REQUEST_SENT", null);
+        }
+
+        return new FollowingStatusDto("BLOCKED", null);
     }
 
     @Override

@@ -13,12 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 
 @RestController
@@ -41,10 +40,13 @@ public class NotificationController {
             notificationService.mute(dto.getUsername(), tokenUtils.getToken(request));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UserDoesNotExistException | FollowRequestFailedBlockedUserException | FollowRequestIsNotApprovedException e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (InvalidFollowRequestUserIsBlockedException e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>("Something went wrong", HttpStatus.BAD_REQUEST);
         }
     }
@@ -56,11 +58,28 @@ public class NotificationController {
             notificationService.unmute(dto.getUsername(), tokenUtils.getToken(request));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UserDoesNotExistException | FollowRequestFailedBlockedUserException | FollowRequestIsNotApprovedException e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (InvalidFollowRequestUserIsBlockedException e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
+            loggerService.logException(e.getMessage());
             return new ResponseEntity<>("Something went wrong", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        loggerService.logValidationFailed(e.getMessage());
+        return new ResponseEntity<>("Invalid characters in request", HttpStatus.BAD_REQUEST);
     }
 }
