@@ -1,5 +1,9 @@
 package org.nistagram.followermicroservice.service.impl;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.nistagram.followermicroservice.controller.dto.SubscriptionDto;
 import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.Interaction;
 import org.nistagram.followermicroservice.data.model.User;
@@ -10,14 +14,24 @@ import org.nistagram.followermicroservice.logging.LoggerService;
 import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+
+import javax.net.ssl.SSLException;
 
 @Service
 public class FollowServiceImpl implements FollowService {
     private final UserRepository userRepository;
     private final InteractionRepository interactionRepository;
     private final LoggerService loggerService = new LoggerServiceImpl(this.getClass());
+
+    @Value("${CONTENT}")
+    private String contentMicroserviceURI;
 
     @Autowired
     public FollowServiceImpl(UserRepository userRepository, InteractionRepository interactionRepository) {
@@ -26,7 +40,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public void follow(String followeeUsername) {
+    public void follow(String followeeUsername, String token) throws SSLException {
         User follower = getCurrentlyLoggedUser();
         User followee = userRepository.findByUsername(followeeUsername);
         validateFollowRequest(follower, followee, follower.getUsername(), followeeUsername);
@@ -36,6 +50,8 @@ public class FollowServiceImpl implements FollowService {
             followingStatus = FollowingStatus.WAITING_FOR_APPROVAL;
         } else {
             followingStatus = FollowingStatus.FOLLOWING;
+            SubscriptionDto dto = new SubscriptionDto(followeeUsername, follower.getUsername());
+            updateSubscription(dto, token, true);
         }
 
         if (!followee.isFollowing(follower) && !followee.isWaitingForApproval(follower)) {
@@ -45,7 +61,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public void unfollow(String followeeUsername) {
+    public void unfollow(String followeeUsername, String token) throws SSLException {
         User follower = getCurrentlyLoggedUser();
         User followee = userRepository.findByUsername(followeeUsername);
         validateFollowRequest(follower, followee, follower.getUsername(), followeeUsername);
@@ -54,11 +70,13 @@ public class FollowServiceImpl implements FollowService {
         validateFollowRequestForUnfollow(interaction);
 
         interactionRepository.deleteRelationship(follower.getUsername(), followeeUsername);
+        SubscriptionDto dto = new SubscriptionDto(followeeUsername, follower.getUsername());
+        updateSubscription(dto, token, false);
         loggerService.logUnfollowRequestSuccess(follower.getUsername(), followeeUsername);
     }
 
     @Override
-    public void acceptFollowRequest(String followerUsername) {
+    public void acceptFollowRequest(String followerUsername, String token) throws SSLException {
         User follower = userRepository.findByUsername(followerUsername);
         User followee = getCurrentlyLoggedUser();
         validateFollowRequest(follower, followee, followerUsername, followee.getUsername());
@@ -67,6 +85,8 @@ public class FollowServiceImpl implements FollowService {
         validateFollowRequestForApproval(interaction);
 
         interactionRepository.updateFollowingStatus(followerUsername, followee.getUsername(), FollowingStatus.FOLLOWING.toString());
+        SubscriptionDto dto = new SubscriptionDto(followee.getUsername(), followerUsername);
+        updateSubscription(dto, token, true);
         loggerService.logFollowRequestApprovalSuccess(followerUsername, followee.getUsername());
     }
 
@@ -140,5 +160,31 @@ public class FollowServiceImpl implements FollowService {
         if (followRequest.getFollowingStatus() != FollowingStatus.FOLLOWING && followRequest.getFollowingStatus() != FollowingStatus.WAITING_FOR_APPROVAL) {
             throw new UserIsNotFollowedException();
         }
+    }
+
+    private void updateSubscription(SubscriptionDto subscriptionDto, String token, boolean subscribe) throws SSLException {
+        String path = (subscribe) ? "subscribe/" : "subscribe/unsubscribe";
+
+        // SSL
+        SslContext sslContext = SslContextBuilder
+                .forClient()
+                .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                .build();
+        HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
+
+        // Creating web client.
+        WebClient client = WebClient.builder()
+                .baseUrl(contentMicroserviceURI)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+
+        // Define a method.
+        var result = client.put()
+                .uri(path)
+                .headers(h -> h.setBearerAuth(token))
+                .body(Mono.just(subscriptionDto), SubscriptionDto.class)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .subscribe();
     }
 }
