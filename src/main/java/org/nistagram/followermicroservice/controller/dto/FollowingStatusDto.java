@@ -29,12 +29,4 @@ public class FollowingStatusDto implements Serializable {
     public void setNotifications(String notifications) {
         this.notifications = notifications;
     }
-
-    @Override
-    public String toString() {
-        return "FollowingStatusDto{" +
-                "following='" + following + '\'' +
-                ", notifications='" + notifications + '\'' +
-                '}';
-    }
 }

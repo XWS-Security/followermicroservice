@@ -152,9 +152,7 @@ public class InteractionController {
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<FollowingStatusDto> getFollowingStatus(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         try {
-            // TODO: log
             FollowingStatusDto result = resourcesService.getFollowingStatus(username);
-            System.out.println(result);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
