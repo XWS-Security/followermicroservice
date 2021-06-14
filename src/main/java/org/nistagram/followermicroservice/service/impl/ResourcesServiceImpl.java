@@ -36,29 +36,28 @@ public class ResourcesServiceImpl implements ResourcesService {
     public FollowingStatusDto getFollowingStatus(String username) {
         User user = getCurrentlyLoggedUser();
         Interaction interaction = interactionRepository.findRelationship(user.getUsername(), username);
+        Interaction reverse = interactionRepository.findRelationship(username, user.getUsername());
 
         if (interaction == null) {
-            Interaction reverse = interactionRepository.findRelationship(username, user.getUsername());
             if (reverse == null) {
-                System.out.println("Reverse does not exist");
-                return new FollowingStatusDto("NOT_FOLLOWING", null);
+                return new FollowingStatusDto("NOT_FOLLOWING", null, false);
             }
             if (reverse.getFollowingStatus() == FollowingStatus.FOLLOWING) {
-                return new FollowingStatusDto("FOLLOWS_YOU", null);
+                return new FollowingStatusDto("FOLLOWS_YOU", null, false);
             }
-            return new FollowingStatusDto("NOT_FOLLOWING", null);
+            return new FollowingStatusDto("NOT_FOLLOWING", null, false);
         }
 
         if (interaction.getFollowingStatus() == FollowingStatus.FOLLOWING) {
             String notifications = interaction.isNotificationsOn() ? "ON" : "OFF";
-            return new FollowingStatusDto("FOLLOWING", notifications);
+            return new FollowingStatusDto("FOLLOWING", notifications, false);
         }
 
         if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
-            return new FollowingStatusDto("REQUEST_SENT", null);
+            return new FollowingStatusDto("REQUEST_SENT", null, false);
         }
 
-        return new FollowingStatusDto("BLOCKED", null);
+        return new FollowingStatusDto("BLOCKED", null, true);
     }
 
     @Override
