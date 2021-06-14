@@ -36,27 +36,27 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void mute(String username, String token) throws SSLException {
-        String followeeUsername = getCurrentlyLoggedUser().getUsername();
+        String currentUsername = getCurrentlyLoggedUser().getUsername();
 
-        validateUsers(username, followeeUsername);
-        validateInteraction(username, followeeUsername);
+        validateUsers(currentUsername, username);
+        validateInteraction(currentUsername, username);
 
-        interactionRepository.updateNotifications(username, followeeUsername, false);
+        interactionRepository.updateNotifications(currentUsername, username, false);
 
-        SubscriptionDto subscriptionDto = new SubscriptionDto(username, followeeUsername);
+        SubscriptionDto subscriptionDto = new SubscriptionDto(username, currentUsername);
         updateSubscription(subscriptionDto, token, false);
     }
 
     @Override
     public void unmute(String username, String token) throws SSLException {
-        String followeeUsername = getCurrentlyLoggedUser().getUsername();
+        String currentUsername = getCurrentlyLoggedUser().getUsername();
 
-        validateUsers(username, followeeUsername);
-        validateInteraction(username, followeeUsername);
+        validateUsers(currentUsername, username);
+        validateInteraction(currentUsername, username);
 
-        interactionRepository.updateNotifications(username, followeeUsername, true);
+        interactionRepository.updateNotifications(currentUsername, username, true);
 
-        SubscriptionDto subscriptionDto = new SubscriptionDto(username, followeeUsername);
+        SubscriptionDto subscriptionDto = new SubscriptionDto(username, currentUsername);
         updateSubscription(subscriptionDto, token, true);
     }
 
