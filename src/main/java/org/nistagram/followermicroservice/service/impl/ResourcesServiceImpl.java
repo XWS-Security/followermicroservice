@@ -36,9 +36,8 @@ public class ResourcesServiceImpl implements ResourcesService {
     public FollowingStatusDto getFollowingStatus(String username) {
         User user = getCurrentlyLoggedUser();
         Interaction interaction = interactionRepository.findRelationship(user.getUsername(), username);
-        System.out.println("Follower: " + user.getUsername() + ", followee: " + username);
+
         if (interaction == null) {
-            System.out.println("Interaction does not exist");
             Interaction reverse = interactionRepository.findRelationship(username, user.getUsername());
             if (reverse == null) {
                 System.out.println("Reverse does not exist");
