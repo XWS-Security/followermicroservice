@@ -7,6 +7,7 @@ import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.*;
 import org.nistagram.followermicroservice.logging.LoggerService;
 import org.nistagram.followermicroservice.logging.LoggerServiceImpl;
+import org.nistagram.followermicroservice.security.TokenUtils;
 import org.nistagram.followermicroservice.service.FollowService;
 import org.nistagram.followermicroservice.service.ResourcesService;
 import org.nistagram.followermicroservice.util.Constants;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
@@ -30,21 +32,23 @@ import java.util.List;
 public class InteractionController {
     private final FollowService followService;
     private final ResourcesService resourcesService;
+    private final TokenUtils tokenUtils;
     private final LoggerService loggerService = new LoggerServiceImpl(this.getClass());
 
     @Autowired
-    public InteractionController(FollowService followService, ResourcesService resourcesService) {
+    public InteractionController(FollowService followService, ResourcesService resourcesService, TokenUtils tokenUtils) {
         this.followService = followService;
         this.resourcesService = resourcesService;
+        this.tokenUtils = tokenUtils;
     }
 
     @PostMapping("/")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto dto) {
+    public ResponseEntity<String> follow(@RequestBody @Valid FollowRequestDto dto, HttpServletRequest request) {
         String username = getCurrentlyLoggedUser().getUsername();
         try {
             loggerService.logFollowRequestSent(username, dto.getUsername());
-            followService.follow(dto.getUsername());
+            followService.follow(dto.getUsername(), tokenUtils.getToken(request));
             return new ResponseEntity<>("Follow request processed", HttpStatus.OK);
         } catch (InvalidFollowRequestUserIsBlockedException e) {
             loggerService.logFollowRequestFailedUserHasBlockedYou(username, dto.getUsername());
@@ -63,11 +67,11 @@ public class InteractionController {
 
     @PutMapping("/")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<String> unfollow(@RequestBody @Valid FollowRequestDto dto) {
+    public ResponseEntity<String> unfollow(@RequestBody @Valid FollowRequestDto dto, HttpServletRequest request) {
         String username = getCurrentlyLoggedUser().getUsername();
         try {
             loggerService.logUnfollowRequestSent(username, dto.getUsername());
-            followService.unfollow(dto.getUsername());
+            followService.unfollow(dto.getUsername(), tokenUtils.getToken(request));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (InvalidFollowRequestUserIsBlockedException e) {
             loggerService.logUnfollowRequestFailedUserHasBlockedYou(username, dto.getUsername());
@@ -86,11 +90,11 @@ public class InteractionController {
 
     @PutMapping("/accept")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<String> acceptFollowRequest(@RequestBody @Valid FollowRequestDto dto) {
+    public ResponseEntity<String> acceptFollowRequest(@RequestBody @Valid FollowRequestDto dto, HttpServletRequest request) {
         String username = getCurrentlyLoggedUser().getUsername();
         try {
             loggerService.logFollowRequestApprovalSent(dto.getUsername(), username);
-            followService.acceptFollowRequest(dto.getUsername());
+            followService.acceptFollowRequest(dto.getUsername(), tokenUtils.getToken(request));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (InvalidFollowRequestUserIsBlockedException e) {
             loggerService.logFollowRequestApprovalFailedUserHasBlockedYou(dto.getUsername(), username);
