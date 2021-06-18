@@ -29,12 +29,12 @@ public class FollowermicroserviceApplication {
         roleRepository.save(role);
 
         // insert test data
-        User luka = new User("luka", false);
+        User luka = new User("luka", true);
         User vlado = new User("vlado", false);
-        User vidoje = new User("vidoje", false);
-        User milica = new User("milica", false);
+        User vidoje = new User("vidoje", true);
+        User milica = new User("milica", true);
         User duja = new User("duja", false);
-        User kobra = new User("kobra", false);
+        User kobra = new User("kobra", true);
 
         luka.setRoles(roles);
         vlado.setRoles(roles);
