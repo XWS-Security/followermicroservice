@@ -1,6 +1,5 @@
 package org.nistagram.followermicroservice;
 
-import org.nistagram.followermicroservice.data.model.Interaction;
 import org.nistagram.followermicroservice.data.model.Role;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.data.repository.InteractionRepository;
@@ -18,7 +17,6 @@ public class FollowermicroserviceApplication {
 
     public static void main(String[] args) {
 //        SpringApplication.run(FollowermicroserviceApplication.class, args);
-        // TODO: Comment out if data already exists
         ApplicationContext ctx = SpringApplication.run(FollowermicroserviceApplication.class, args);
 
         // insert roles into database
