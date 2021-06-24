@@ -40,24 +40,25 @@ public class ResourcesServiceImpl implements ResourcesService {
 
         if (interaction == null) {
             if (reverse == null) {
-                return new FollowingStatusDto("NOT_FOLLOWING", null, false);
+                return new FollowingStatusDto("NOT_FOLLOWING", null, false, false);
             }
             if (reverse.getFollowingStatus() == FollowingStatus.FOLLOWING) {
-                return new FollowingStatusDto("FOLLOWS_YOU", null, false);
+                return new FollowingStatusDto("FOLLOWS_YOU", null, false, false);
             }
-            return new FollowingStatusDto("NOT_FOLLOWING", null, false);
+            return new FollowingStatusDto("NOT_FOLLOWING", null, false, false);
         }
 
         if (interaction.getFollowingStatus() == FollowingStatus.FOLLOWING) {
             String notifications = interaction.isNotificationsOn() ? "ON" : "OFF";
-            return new FollowingStatusDto("FOLLOWING", notifications, false);
+            boolean muted = interaction.isMuted();
+            return new FollowingStatusDto("FOLLOWING", notifications, muted, false);
         }
 
         if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
-            return new FollowingStatusDto("REQUEST_SENT", null, false);
+            return new FollowingStatusDto("REQUEST_SENT", null, false, false);
         }
 
-        return new FollowingStatusDto("BLOCKED", null, true);
+        return new FollowingStatusDto("BLOCKED", null, false, true);
     }
 
     @Override

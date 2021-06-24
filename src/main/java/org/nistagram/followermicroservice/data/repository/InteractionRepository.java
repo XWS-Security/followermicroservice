@@ -28,6 +28,9 @@ public interface InteractionRepository extends Neo4jRepository<Interaction, Long
     @Query("MATCH (follower:NistagramUser {username: $0})-[:FOLLOWING {followingStatus: 'FOLLOWING'}]->(followee:NistagramUser) RETURN count(followee)")
     int getNumberOfFollowing(String username);
 
+    @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) SET r.muted = $2 RETURN r")
+    Interaction updateMuted(String followerUsername, String followeeUsername, boolean muted);
+
     @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) SET r.notificationsOn = $2 RETURN r")
     Interaction updateNotifications(String followerUsername, String followeeUsername, boolean notificationsOn);
 }

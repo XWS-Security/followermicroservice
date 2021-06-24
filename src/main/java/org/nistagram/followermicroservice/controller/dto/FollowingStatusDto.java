@@ -5,14 +5,16 @@ import java.io.Serializable;
 public class FollowingStatusDto implements Serializable {
     private String following;
     private String notifications;
+    private boolean muted;
     private boolean blocked;
 
     public FollowingStatusDto() {
     }
 
-    public FollowingStatusDto(String following, String notifications, boolean blocked) {
+    public FollowingStatusDto(String following, String notifications, boolean muted, boolean blocked) {
         this.following = following;
         this.notifications = notifications;
+        this.muted = muted;
         this.blocked = blocked;
     }
 
@@ -30,6 +32,14 @@ public class FollowingStatusDto implements Serializable {
 
     public void setNotifications(String notifications) {
         this.notifications = notifications;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 
     public boolean isBlocked() {

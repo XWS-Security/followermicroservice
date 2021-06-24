@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
         validateUsers(currentUsername, username);
         validateInteraction(currentUsername, username);
 
-        interactionRepository.updateNotifications(currentUsername, username, false);
+        interactionRepository.updateMuted(currentUsername, username, true);
 
         SubscriptionDto subscriptionDto = new SubscriptionDto(username, currentUsername);
         updateSubscription(subscriptionDto, token, false);
@@ -54,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
         validateUsers(currentUsername, username);
         validateInteraction(currentUsername, username);
 
-        interactionRepository.updateNotifications(currentUsername, username, true);
+        interactionRepository.updateMuted(currentUsername, username, false);
 
         SubscriptionDto subscriptionDto = new SubscriptionDto(username, currentUsername);
         updateSubscription(subscriptionDto, token, true);
