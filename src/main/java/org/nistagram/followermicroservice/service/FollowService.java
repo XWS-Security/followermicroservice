@@ -11,5 +11,7 @@ public interface FollowService {
 
     void rejectFollowRequest(String followeeUsername);
 
-    void validateAccess(String username);
+    void validateInteractionAccess(String username);
+
+    void validateViewAccess(String username);
 }

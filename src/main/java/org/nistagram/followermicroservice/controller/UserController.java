@@ -72,12 +72,12 @@ public class UserController {
 
     @GetMapping("/hasAccess/{username}")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<HasAccessResponseDto> hasAccess(
+    public ResponseEntity<HasAccessResponseDto> hasInteractionAccess(
             @PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         String currentUser = getCurrentlyLoggedUser().getUsername();
         try {
             loggerService.logValidateAccessRequestSent(currentUser, username);
-            followService.validateAccess(username);
+            followService.validateInteractionAccess(username);
             var result = new HasAccessResponseDto(true, "");
             loggerService.logValidateAccessRequestSuccess(currentUser, username);
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -85,6 +85,25 @@ public class UserController {
             var result = new HasAccessResponseDto(false, e.getMessage());
             loggerService.logValidateAccessRequestFail(currentUser, username, e.getMessage());
             return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(new HasAccessResponseDto(false, "Something went wrong"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/hasViewAccess/{username}")
+    public ResponseEntity<HasAccessResponseDto> hasViewAccess(
+            @PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+        try {
+            followService.validateViewAccess(username);
+            var result = new HasAccessResponseDto(true, "");
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (FollowRequestDoesNotExistException | InvalidFollowRequestUserIsBlockedException | FollowRequestNotApprovedException e) {
+            var result = new HasAccessResponseDto(false, e.getMessage());
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (AnonymousUserCannotAccessPrivateProfileContentException e) {
+            var result = new HasAccessResponseDto(false, e.getMessage());
+            return new ResponseEntity<>(result, HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
             return new ResponseEntity<>(new HasAccessResponseDto(false, "Something went wrong"), HttpStatus.BAD_REQUEST);
