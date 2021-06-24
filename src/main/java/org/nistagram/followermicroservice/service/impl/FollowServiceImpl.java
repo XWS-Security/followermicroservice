@@ -104,13 +104,35 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public void validateAccess(String username) {
+    public void validateInteractionAccess(String username) {
         String currentUsername = getCurrentlyLoggedUser().getUsername();
         Interaction interaction = interactionRepository.findRelationship(currentUsername, username);
 
         if (interaction == null) {
             throw new FollowRequestDoesNotExistException();
         }
+
+        if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
+            throw new FollowRequestNotApprovedException();
+        }
+
+        if (interaction.getFollowingStatus() == FollowingStatus.BLOCKED) {
+            throw new InvalidFollowRequestUserIsBlockedException();
+        }
+    }
+
+    @Override
+    public void validateViewAccess(String username) {
+        User user = userRepository.findByUsername(username);
+        if (!user.isProfilePrivate()) return;
+
+        User currentUser = getCurrentlyLoggedUser();
+        if (currentUser == null) throw new AnonymousUserCannotAccessPrivateProfileContentException();
+
+        if (username.equals(currentUser.getUsername())) return;
+
+        Interaction interaction = interactionRepository.findRelationship(currentUser.getUsername(), username);
+        if (interaction == null) throw new FollowRequestDoesNotExistException();
 
         if (interaction.getFollowingStatus() == FollowingStatus.WAITING_FOR_APPROVAL) {
             throw new FollowRequestNotApprovedException();
