@@ -13,4 +13,6 @@ public interface ResourcesService {
     int getNumOfFollowers(String username);
 
     int getNumOfFollowing(String username);
+
+    String canHire(String username);
 }
