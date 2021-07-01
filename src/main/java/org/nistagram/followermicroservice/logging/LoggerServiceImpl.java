@@ -177,4 +177,19 @@ public class LoggerServiceImpl implements LoggerService {
     public void logValidateAccessRequestFail(String follower, String followed, String reason) {
         logger.info("Validate access request failed: {'from': {}, 'to': {}, 'reason': {} }", follower, followed, reason);
     }
+
+    @Override
+    public void logCreateUserReverted(String username) {
+        logger.info("Delete user request sent: {'username': {} }", username);
+    }
+
+    @Override
+    public void logCreateUserRevertedSuccess(String username) {
+        logger.info("Delete user request success: {'username': {} }", username);
+    }
+
+    @Override
+    public void logCreateUserRevertedFail(String username, String message) {
+        logger.info("Delete user request failed: {'username': {}, 'message': {} }", username, message);
+    }
 }
