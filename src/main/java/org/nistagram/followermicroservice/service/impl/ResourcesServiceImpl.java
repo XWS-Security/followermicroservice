@@ -6,6 +6,7 @@ import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.Interaction;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.data.repository.InteractionRepository;
+import org.nistagram.followermicroservice.data.repository.UserRepository;
 import org.nistagram.followermicroservice.service.ResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +18,12 @@ import java.util.List;
 @Service
 public class ResourcesServiceImpl implements ResourcesService {
     private final InteractionRepository interactionRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public ResourcesServiceImpl(InteractionRepository interactionRepository) {
+    public ResourcesServiceImpl(InteractionRepository interactionRepository, UserRepository userRepository) {
         this.interactionRepository = interactionRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -60,6 +63,19 @@ public class ResourcesServiceImpl implements ResourcesService {
 
         return new FollowingStatusDto("BLOCKED", null, false, true);
     }
+
+    @Override
+    public String canHire(String username) {
+       var status = getFollowingStatus(username);
+       var user = userRepository.findByUsername(username);
+       if(!user.isProfilePrivate()){
+           if(status.getFollowing().equals("REQUEST_SENT")) return "REQUEST_SENT";
+           else if(status.getFollowing().equals("FOLLOWING")) return "FOLLOWING";
+           else return "NOT_FOLLOWING";
+       }
+       return "PUBLIC";
+    }
+
 
     @Override
     public int getNumOfFollowers(String username) {
