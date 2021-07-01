@@ -58,6 +58,11 @@ public class UserServiceImpl implements UserService {
         userRepository.updateProperties(loadedUser.getId(), editUserDto.getUsername(), editUserDto.isProfilePrivate());
     }
 
+    @Override
+    public void deleteUser(User user) {
+        userRepository.deleteDetach(user.getUsername());
+    }
+
     // The query number is not optimal here but there have been issues with saveAll function
     // Also this method is an edge case and is not going to be used very often
     private void updatePendingFollowRequests(User user) {

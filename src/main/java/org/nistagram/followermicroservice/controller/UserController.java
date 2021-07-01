@@ -3,6 +3,7 @@ package org.nistagram.followermicroservice.controller;
 import org.modelmapper.ModelMapper;
 import org.nistagram.followermicroservice.controller.dto.EditUserDto;
 import org.nistagram.followermicroservice.controller.dto.HasAccessResponseDto;
+import org.nistagram.followermicroservice.controller.dto.ResponseDto;
 import org.nistagram.followermicroservice.controller.dto.UserDto;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.*;
@@ -38,18 +39,31 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> createUser(@RequestBody @Valid UserDto userDto) {
+    public ResponseEntity<ResponseDto> createUser(@RequestBody @Valid UserDto userDto) {
         try {
             loggerService.logCreateUser(userDto.getUsername());
             userService.saveUser(modelMapper.map(userDto, User.class));
             loggerService.logCreateUserSuccess(userDto.getUsername());
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDto(true, ""), HttpStatus.OK);
         } catch (UsernameAlreadyExistsException e) {
             loggerService.logCreateUserFail(userDto.getUsername(), e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseDto(false, e.getMessage()), HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
-            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDto(false, "Something went wrong."), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestBody @Valid UserDto userDto) {
+        try {
+            loggerService.logCreateUserReverted(userDto.getUsername());
+            userService.deleteUser(modelMapper.map(userDto, User.class));
+            loggerService.logCreateUserRevertedSuccess(userDto.getUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logCreateUserRevertedFail(userDto.getUsername(), e.getMessage());
+            return new ResponseEntity<>("Something went wrong.", HttpStatus.BAD_REQUEST);
         }
     }
 

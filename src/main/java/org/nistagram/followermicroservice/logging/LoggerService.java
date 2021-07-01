@@ -64,4 +64,10 @@ public interface LoggerService {
     void logValidateAccessRequestSuccess(String follower, String followed);
 
     void logValidateAccessRequestFail(String follower, String followed, String reason);
+
+    void logCreateUserReverted(String username);
+
+    void logCreateUserRevertedSuccess(String username);
+
+    void logCreateUserRevertedFail(String username, String message);
 }
