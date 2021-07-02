@@ -69,18 +69,18 @@ public class UserController {
 
     @PutMapping("")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
-    public ResponseEntity<String> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
+    public ResponseEntity<ResponseDto> updateUser(@RequestBody @Valid EditUserDto editUserDto) {
         try {
             loggerService.logUpdateUser(editUserDto.getUsername(), editUserDto.getOldUsername());
             userService.updateUser(editUserDto);
             loggerService.logUpdateUserSuccess(editUserDto.getUsername(), editUserDto.getOldUsername());
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDto(true, ""), HttpStatus.OK);
         } catch (UsernameAlreadyExistsException | UserDoesNotExistException e) {
             loggerService.logUpdateUserFail(editUserDto.getUsername(), editUserDto.getOldUsername(), e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ResponseDto(false, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
-            return new ResponseEntity<>("Something went wrong.", HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDto(false, "Something went wrong."), HttpStatus.OK);
         }
     }
 
