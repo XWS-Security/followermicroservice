@@ -1,9 +1,6 @@
 package org.nistagram.followermicroservice.controller;
 
-import org.nistagram.followermicroservice.controller.dto.FollowRequestDto;
-import org.nistagram.followermicroservice.controller.dto.FollowingNumbersDto;
-import org.nistagram.followermicroservice.controller.dto.FollowingStatusDto;
-import org.nistagram.followermicroservice.controller.dto.InteractionDto;
+import org.nistagram.followermicroservice.controller.dto.*;
 import org.nistagram.followermicroservice.data.model.User;
 import org.nistagram.followermicroservice.exception.*;
 import org.nistagram.followermicroservice.logging.LoggerService;
@@ -139,7 +136,6 @@ public class InteractionController {
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<List<InteractionDto>> getWaitingForApproval() {
         try {
-            // TODO: log
             List<InteractionDto> result = resourcesService.getWaitingForApproval();
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
@@ -175,8 +171,18 @@ public class InteractionController {
     @GetMapping("/numbers/{username}")
     public ResponseEntity<FollowingNumbersDto> getFollowingStats(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         try {
-            // TODO: log
             var result = new FollowingNumbersDto(resourcesService.getNumOfFollowers(username), resourcesService.getNumOfFollowing(username));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/followers")
+    public ResponseEntity<List<UserDto>> getFollowers() {
+        try {
+            var result = resourcesService.getFollowers();
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
