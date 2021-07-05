@@ -2,6 +2,7 @@ package org.nistagram.followermicroservice.service.impl;
 
 import org.nistagram.followermicroservice.controller.dto.FollowingStatusDto;
 import org.nistagram.followermicroservice.controller.dto.InteractionDto;
+import org.nistagram.followermicroservice.controller.dto.UserDto;
 import org.nistagram.followermicroservice.data.model.FollowingStatus;
 import org.nistagram.followermicroservice.data.model.Interaction;
 import org.nistagram.followermicroservice.data.model.User;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ResourcesServiceImpl implements ResourcesService {
@@ -66,16 +68,15 @@ public class ResourcesServiceImpl implements ResourcesService {
 
     @Override
     public String canHire(String username) {
-       var status = getFollowingStatus(username);
-       var user = userRepository.findByUsername(username);
-       if(!user.isProfilePrivate()){
-           if(status.getFollowing().equals("REQUEST_SENT")) return "REQUEST_SENT";
-           else if(status.getFollowing().equals("FOLLOWING")) return "FOLLOWING";
-           else return "NOT_FOLLOWING";
-       }
-       return "PUBLIC";
+        var status = getFollowingStatus(username);
+        var user = userRepository.findByUsername(username);
+        if (!user.isProfilePrivate()) {
+            if (status.getFollowing().equals("REQUEST_SENT")) return "REQUEST_SENT";
+            else if (status.getFollowing().equals("FOLLOWING")) return "FOLLOWING";
+            else return "NOT_FOLLOWING";
+        }
+        return "PUBLIC";
     }
-
 
     @Override
     public int getNumOfFollowers(String username) {
@@ -85,6 +86,13 @@ public class ResourcesServiceImpl implements ResourcesService {
     @Override
     public int getNumOfFollowing(String username) {
         return interactionRepository.getNumberOfFollowing(username);
+    }
+
+    @Override
+    public List<UserDto> getFollowers() {
+        User user = getCurrentlyLoggedUser();
+        return interactionRepository.findFollowers(user.getUsername()).stream()
+                .map(u -> new UserDto(u.getUsername(), u.isProfilePrivate())).collect(Collectors.toList());
     }
 
     private User getCurrentlyLoggedUser() {

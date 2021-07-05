@@ -3,6 +3,7 @@ package org.nistagram.followermicroservice.data.repository;
 import org.neo4j.springframework.data.repository.Neo4jRepository;
 import org.neo4j.springframework.data.repository.query.Query;
 import org.nistagram.followermicroservice.data.model.Interaction;
+import org.nistagram.followermicroservice.data.model.User;
 
 import java.util.List;
 
@@ -33,4 +34,7 @@ public interface InteractionRepository extends Neo4jRepository<Interaction, Long
 
     @Query("MATCH (u1:NistagramUser {username: $0})-[r:FOLLOWING]->(u2:NistagramUser {username: $1}) SET r.notificationsOn = $2 RETURN r")
     Interaction updateNotifications(String followerUsername, String followeeUsername, boolean notificationsOn);
+
+    @Query("MATCH(f:NistagramUser)-[:FOLLOWING {followingStatus:'FOLLOWING'}]->(:NistagramUser {username:$0}) RETURN f")
+    List<User> findFollowers(String username);
 }
