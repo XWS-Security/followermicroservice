@@ -86,7 +86,7 @@ public class ResourcesServiceImpl implements ResourcesService {
     public String canHire(String username) {
         var status = getFollowingStatus(username);
         var user = userRepository.findByUsername(username);
-        if (!user.isProfilePrivate()) {
+        if (user.isProfilePrivate()) {
             if (status.getFollowing().equals("REQUEST_SENT")) return "REQUEST_SENT";
             else if (status.getFollowing().equals("FOLLOWING")) return "FOLLOWING";
             else return "NOT_FOLLOWING";
