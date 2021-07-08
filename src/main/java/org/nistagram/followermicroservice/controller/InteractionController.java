@@ -156,6 +156,18 @@ public class InteractionController {
         }
     }
 
+    @GetMapping("/reverse/{username}")
+    @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
+    public ResponseEntity<FollowingStatusDto> getReverseFollowingStatus(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
+        try {
+            FollowingStatusDto result = resourcesService.getReverseFollowingStatus(username);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/hire/{username}")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<String> canSendHireRequest(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {

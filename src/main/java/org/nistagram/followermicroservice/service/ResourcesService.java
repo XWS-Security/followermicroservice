@@ -11,6 +11,8 @@ public interface ResourcesService {
 
     FollowingStatusDto getFollowingStatus(String username);
 
+    FollowingStatusDto getReverseFollowingStatus(String username);
+
     int getNumOfFollowers(String username);
 
     int getNumOfFollowing(String username);

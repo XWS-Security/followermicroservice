@@ -60,5 +60,6 @@ public class FollowermicroserviceApplication {
         interactionRepository.saveRelationship("duja", "milica", "FOLLOWING");
         interactionRepository.saveRelationship("milica", "luka", "FOLLOWING");
         interactionRepository.saveRelationship("vlado", "kobra", "FOLLOWING");
+        interactionRepository.saveRelationship("luka", "duja", "BLOCKED");
     }
 }
