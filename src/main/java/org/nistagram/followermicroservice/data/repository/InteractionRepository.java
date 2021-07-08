@@ -37,4 +37,10 @@ public interface InteractionRepository extends Neo4jRepository<Interaction, Long
 
     @Query("MATCH(f:NistagramUser)-[:FOLLOWING {followingStatus:'FOLLOWING'}]->(:NistagramUser {username:$0}) RETURN f")
     List<User> findFollowers(String username);
+
+    @Query("MATCH(:NistagramUser)-[:FOLLOWING {followingStatus:'FOLLOWING'}]->(f:NistagramUser {username:$0}) RETURN f")
+    List<User> findFollowing(String username);
+
+    @Query("MATCH (:NistagramUser {username: $0})-[:FOLLOWING*2 {followingStatus: 'FOLLOWING'}]->(r:NistagramUser) RETURN DISTINCT r")
+    List<User> findSecondLevelFollowers(String username);
 }

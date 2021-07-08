@@ -20,4 +20,6 @@ public interface ResourcesService {
     String canHire(String username);
 
     List<UserDto> getFollowers();
+
+    List<UserDto> getRecommendedUsers();
 }

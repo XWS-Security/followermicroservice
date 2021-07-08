@@ -144,6 +144,28 @@ public class InteractionController {
         }
     }
 
+    @GetMapping("/followers")
+    public ResponseEntity<List<UserDto>> getFollowers() {
+        try {
+            var result = resourcesService.getFollowers();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/recommended")
+    public ResponseEntity<List<UserDto>> getRecommendedUsers() {
+        try {
+            var result = resourcesService.getRecommendedUsers();
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            loggerService.logException(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/{username}")
     @PreAuthorize("hasAuthority('NISTAGRAM_USER_ROLE')")
     public ResponseEntity<FollowingStatusDto> getFollowingStatus(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
@@ -184,17 +206,6 @@ public class InteractionController {
     public ResponseEntity<FollowingNumbersDto> getFollowingStats(@PathVariable("username") @Pattern(regexp = Constants.USERNAME_PATTERN, message = Constants.USERNAME_INVALID_MESSAGE) String username) {
         try {
             var result = new FollowingNumbersDto(resourcesService.getNumOfFollowers(username), resourcesService.getNumOfFollowing(username));
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            loggerService.logException(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @GetMapping("/followers")
-    public ResponseEntity<List<UserDto>> getFollowers() {
-        try {
-            var result = resourcesService.getFollowers();
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             loggerService.logException(e.getMessage());
