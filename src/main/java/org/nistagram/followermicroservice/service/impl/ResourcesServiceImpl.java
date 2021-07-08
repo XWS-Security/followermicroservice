@@ -67,6 +67,22 @@ public class ResourcesServiceImpl implements ResourcesService {
     }
 
     @Override
+    public FollowingStatusDto getReverseFollowingStatus(String username) {
+        User user = getCurrentlyLoggedUser();
+        Interaction interaction = interactionRepository.findRelationship(user.getUsername(), username);
+        Interaction reverse = interactionRepository.findRelationship(username, user.getUsername());
+
+        if (interaction != null && interaction.getFollowingStatus() == FollowingStatus.BLOCKED)
+            return new FollowingStatusDto("USER_BLOCKED", null, false, false);
+
+        if (reverse != null) {
+            return new FollowingStatusDto(reverse.getFollowingStatus().name(), null, false, false);
+        }
+
+        return new FollowingStatusDto("NOT_FOLLOWING", null, false, false);
+    }
+
+    @Override
     public String canHire(String username) {
         var status = getFollowingStatus(username);
         var user = userRepository.findByUsername(username);
