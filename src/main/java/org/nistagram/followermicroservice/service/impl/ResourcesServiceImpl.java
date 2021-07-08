@@ -111,6 +111,19 @@ public class ResourcesServiceImpl implements ResourcesService {
                 .map(u -> new UserDto(u.getUsername(), u.isProfilePrivate())).collect(Collectors.toList());
     }
 
+    @Override
+    public List<UserDto> getRecommendedUsers() {
+        User user = getCurrentlyLoggedUser();
+        List<User> recommended = interactionRepository.findSecondLevelFollowers(user.getUsername());
+        List<User> result = new ArrayList<>();
+        for (User recommendation : recommended) {
+            if (user.getUsername().equals(recommendation.getUsername())) continue;
+            var interaction = interactionRepository.findRelationship(user.getUsername(), recommendation.getUsername());
+            if (interaction == null) result.add(recommendation);
+        }
+        return result.stream().map(u -> new UserDto(u.getUsername(), u.isProfilePrivate())).collect(Collectors.toList());
+    }
+
     private User getCurrentlyLoggedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
